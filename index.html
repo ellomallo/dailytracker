@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Productivity Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+          colors: {
+            brand: { 50:'#f0fdf9', 100:'#ccfbef', 200:'#99f6de', 300:'#5eead4', 400:'#2dd4bf', 500:'#14b8a6', 600:'#0d9488', 700:'#0f766e', 800:'#115e59', 900:'#134e4a' },
+            surface: { 900:'#0a0f1e', 800:'#0f172a', 700:'#1e293b', 600:'#263348', 500:'#334155' },
+          },
+          animation: { 'fade-in': 'fadeIn 0.3s ease-out', 'slide-up': 'slideUp 0.3s ease-out' }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-surface-900 text-slate-100 font-sans antialiased min-h-screen">
+
+<!-- Overlay for mobile sidebar -->
+<div id="sidebarOverlay" class="fixed inset-0 bg-black/60 z-30 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+<!-- ─────────────── SIDEBAR ─────────────── -->
+<aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-surface-800 border-r border-slate-700/50 z-40 flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0">
+  
+  <!-- Logo -->
+  <div class="p-5 border-b border-slate-700/50">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center text-white font-bold text-sm">PT</div>
+      <div>
+        <div class="font-semibold text-sm text-white">Productivity</div>
+        <div class="text-xs text-slate-400 font-mono">Tracker v1.0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 mb-3">Main</p>
+    <button onclick="navigateTo('dashboard')" class="nav-item active" data-page="dashboard">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      Dashboard
+    </button>
+    <button onclick="navigateTo('calendar')" class="nav-item" data-page="calendar">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      Kalender
+    </button>
+
+    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 mb-3 mt-5">Academic</p>
+    <button onclick="navigateTo('courses')" class="nav-item" data-page="courses">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+      Mata Kuliah
+    </button>
+    <button onclick="navigateTo('tasks')" class="nav-item" data-page="tasks">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+      Tugas & Todo
+    </button>
+
+    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 mb-3 mt-5">Health & Life</p>
+    <button onclick="navigateTo('gym')" class="nav-item" data-page="gym">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+      Gym & Fitness
+    </button>
+    <button onclick="navigateTo('habits')" class="nav-item" data-page="habits">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      Habit & Air
+    </button>
+    <button onclick="navigateTo('finance')" class="nav-item" data-page="finance">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      Keuangan
+    </button>
+
+    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 mb-3 mt-5">Settings</p>
+    <button onclick="navigateTo('settings')" class="nav-item" data-page="settings">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      Pengaturan
+    </button>
+  </nav>
+
+  <!-- User Footer -->
+  <div class="p-4 border-t border-slate-700/50">
+    <div class="flex items-center gap-3">
+      <div id="userAvatar" class="w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center text-xs font-bold">?</div>
+      <div class="flex-1 min-w-0">
+        <div id="userName" class="text-sm font-medium truncate text-white">Belum Login</div>
+        <div class="text-xs text-slate-400">Google Account</div>
+      </div>
+      <button id="darkModeToggle" onclick="toggleDarkMode()" class="text-slate-400 hover:text-white transition-colors" title="Toggle Dark Mode">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- ─────────────── MAIN CONTENT ─────────────── -->
+<div class="lg:ml-64 min-h-screen flex flex-col">
+
+  <!-- Top Bar -->
+  <header class="sticky top-0 z-20 bg-surface-800/80 backdrop-blur-md border-b border-slate-700/50 px-4 lg:px-6 h-14 flex items-center gap-4">
+    <button onclick="toggleSidebar()" class="lg:hidden text-slate-400 hover:text-white">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div class="flex-1">
+      <h1 id="pageTitle" class="text-sm font-semibold text-white">Dashboard</h1>
+    </div>
+    <div class="flex items-center gap-2">
+      <!-- Sync Status -->
+      <div id="syncStatus" class="flex items-center gap-1.5 text-xs text-slate-400 bg-surface-700 px-3 py-1.5 rounded-full">
+        <div class="w-1.5 h-1.5 rounded-full bg-slate-500" id="syncDot"></div>
+        <span id="syncText">Offline</span>
+      </div>
+      <!-- Auth Button -->
+      <button id="authBtn" onclick="handleAuth()" class="text-xs bg-brand-600 hover:bg-brand-500 text-white px-3 py-1.5 rounded-lg font-medium transition-colors">
+        Login Google
+      </button>
+    </div>
+  </header>
+
+  <!-- Page Container -->
+  <main class="flex-1 p-4 lg:p-6" id="pageContainer">
+    <!-- Pages rendered by JS -->
+  </main>
+</div>
+
+<!-- ─────────────── MODALS ─────────────── -->
+<div id="modalBackdrop" class="fixed inset-0 bg-black/70 z-50 hidden items-center justify-center p-4">
+  <div id="modalContent" class="bg-surface-800 border border-slate-700/50 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl animate-fade-in">
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toastContainer" class="fixed bottom-6 right-6 z-50 space-y-2 pointer-events-none"></div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/store.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/pages/dashboard.js"></script>
+<script src="js/pages/calendar.js"></script>
+<script src="js/pages/courses.js"></script>
+<script src="js/pages/tasks.js"></script>
+<script src="js/pages/gym.js"></script>
+<script src="js/pages/habits.js"></script>
+<script src="js/pages/finance.js"></script>
+<script src="js/pages/settings.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
